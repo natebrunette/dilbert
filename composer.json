@@ -1,0 +1,28 @@
+{
+    "name": "tebru/dilbertpics",
+    "description": "Tweet the daily dilbert comic image.",
+    "require": {
+        "php": ">= 5.5",
+        "ext-spl_types": "*",
+
+        "tebru/executioner": "dev-master",
+        "guzzlehttp/guzzle": "dev-master",
+        "guzzlehttp/oauth-subscriber": "dev-master",
+        "guzzlehttp/log-subscriber": "dev-master",
+        "jms/serializer": "dev-master",
+        "monolog/monolog": "dev-master"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Nate Brunette",
+            "email": "n@tebru.net"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "Tebru\\DilbertPics\\": "src/"
+        }
+    }
+}
