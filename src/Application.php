@@ -20,9 +20,7 @@ use Tebru\DilbertPics\Exception\InvalidArgumentException;
 use Tebru\DilbertPics\Model\RssItem;
 use Tebru\Executioner\Executor;
 use Tebru\Executioner\Logger\ExceptionLogger;
-use Tebru\Executioner\Strategy\Termination\TimeBoundTerminationStrategy;
 use Tebru\Executioner\Strategy\Wait\ExponentialWaitStrategy;
-use Tebru\Executioner\Strategy\Wait\FibonacciWaitStrategy;
 
 /**
  * Class Application
@@ -76,14 +74,14 @@ class Application
         }
 
         $serializer = SerializerBuilder::create()->build();
-        $dilbertClient = new DilbertClient($serializer);
+        $httpClient = new Client();
+        $dilbertClient = new DilbertClient($serializer, $httpClient);
 
         $rssExecutor = $this->createRssExecutor();
 
         // get the latest rss item
         /** @var RssItem $rssItem */
         $rssItem = $rssExecutor->execute(function () use ($dilbertClient) { return $dilbertClient->getItem(); });
-        $rssItem->setPublishedTimezone();
 
         // get the image from dilbert.com
         $imageExecutor = $this->createImageExecutor();
@@ -109,11 +107,6 @@ class Application
         );
     }
 
-    public function errorHandler()
-    {
-
-    }
-
     /**
      * Create executor to poll rss feed
      *
@@ -122,11 +115,9 @@ class Application
     private function createRssExecutor()
     {
         $logger = new ExceptionLogger($this->logger, Logger::ERROR, 'Unable to get RSS Item');
-        $waitStrategy = new FibonacciWaitStrategy(60, 0);
-        $terminationStrategy = new TimeBoundTerminationStrategy(7200);
 
-        $executor = new Executor($logger, $waitStrategy, $terminationStrategy);
-        $executor->setRetryableReturns([false]);
+        $executor = new Executor($logger);
+        $executor->sleep(60)->limit(30);
 
         return $executor;
     }
@@ -141,7 +132,7 @@ class Application
         $logger = new ExceptionLogger($this->logger, Logger::CRITICAL, 'Unable to get image');
 
         $executor = new Executor($logger);
-        $executor->sleep(5)->limit(3);
+        $executor->sleep(60)->limit(30);
 
         return $executor;
     }

@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "cd9059013634fda946b4ca9519c7ba4a",
+    "hash": "559535f944cd2f0392d56d0ba66b6235",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -806,6 +806,63 @@
             "time": "2014-12-30 13:32:42"
         },
         {
+            "name": "symfony/debug",
+            "version": "dev-master",
+            "target-dir": "Symfony/Component/Debug",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/Debug.git",
+                "reference": "89c97a9d7960fea0d75f75e9a47430a011ef8a17"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/Debug/zipball/89c97a9d7960fea0d75f75e9a47430a011ef8a17",
+                "reference": "89c97a9d7960fea0d75f75e9a47430a011ef8a17",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.5.9",
+                "psr/log": "~1.0"
+            },
+            "require-dev": {
+                "symfony/class-loader": "~2.2",
+                "symfony/http-foundation": "~2.7|~3.0",
+                "symfony/http-kernel": "~2.7|~3.0"
+            },
+            "suggest": {
+                "symfony/http-foundation": "",
+                "symfony/http-kernel": ""
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Symfony\\Component\\Debug\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Symfony Community",
+                    "homepage": "http://symfony.com/contributors"
+                },
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                }
+            ],
+            "description": "Symfony Debug Component",
+            "homepage": "http://symfony.com",
+            "time": "2015-01-06 10:39:25"
+        },
+        {
             "name": "tebru/executioner",
             "version": "dev-master",
             "source": {
@@ -858,7 +915,8 @@
         "guzzlehttp/oauth-subscriber": 20,
         "guzzlehttp/log-subscriber": 20,
         "jms/serializer": 20,
-        "monolog/monolog": 20
+        "monolog/monolog": 20,
+        "symfony/debug": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

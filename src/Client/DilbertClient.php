@@ -9,8 +9,11 @@ use DateTime;
 use DateTimeZone;
 use DOMDocument;
 use DOMElement;
+use GuzzleHttp\ClientInterface;
 use JMS\Serializer\SerializerInterface;
+use Tebru\DilbertPics\Exception\NoNewPublicationException;
 use Tebru\DilbertPics\Exception\NullPointerException;
+use Tebru\DilbertPics\Exception\ResourceNotFoundException;
 use Tebru\DilbertPics\Model\RssItem;
 use XMLReader;
 
@@ -39,13 +42,19 @@ class DilbertClient
     private $serializer;
 
     /**
+     * @var ClientInterface $httpCient
+     */
+    private $httpCient;
+
+    /**
      * Constructor
      *
      * @param SerializerInterface $serializer
      */
-    public function __construct(SerializerInterface $serializer)
+    public function __construct(SerializerInterface $serializer, ClientInterface $httpCient)
     {
         $this->serializer = $serializer;
+        $this->httpCient = $httpCient;
     }
 
     /**
@@ -54,6 +63,8 @@ class DilbertClient
      * Will return false if there isn't a new item
      *
      * @return RssItem|bool
+     * @throws NoNewPublicationException
+     * @throws NullPointerException
      */
     public function getItem()
     {
@@ -66,10 +77,12 @@ class DilbertClient
         $document = new DOMDocument();
         $xmlNode = simplexml_import_dom($document->importNode($reader->expand(), true));
 
+        /** @var RssItem $rssItem */
         $rssItem = $this->serializer->deserialize($xmlNode->asXML(), RssItem::class, 'xml');
+        $rssItem->setPublishedTimezone();
 
         if(!$this->hasNewPublication($rssItem)) {
-            return false;
+            throw new NoNewPublicationException('There is not a new publication');
         }
 
         return $rssItem;
@@ -89,6 +102,12 @@ class DilbertClient
     public function getImage(RssItem $item)
     {
         $link = $item->getLink();
+
+        // check if image exists
+        if (!$this->pageExists($link)) {
+            throw new ResourceNotFoundException('Image does not exist');
+        }
+
         $webpage = file_get_contents($link);
         $html = new DOMDocument();
 
@@ -100,13 +119,12 @@ class DilbertClient
         // look for all images and grab the comic based on regex of src attribute
         $images = $html->getElementsByTagName('img');
         $src = null;
-        $regex = '/(?:http:).+(?:strip\.gif)/';
+        $regex = '/(?:http:).+(?:strip(?:.sunday)\.gif)/';
 
         /** @var DOMElement $image */
         foreach ($images as $image) {
-            $src = $image->getAttribute('src');
-
-            if (preg_match($regex, $src)) {
+            if (preg_match($regex, $image->getAttribute('src'))) {
+                $src = $image->getAttribute('src');
                 break;
             }
         }
@@ -116,6 +134,21 @@ class DilbertClient
         }
 
         return base64_encode(file_get_contents($src));
+    }
+
+    /**
+     * Ensure web page exists
+     *
+     * @param string $url
+     *
+     * @return bool
+     */
+    private function pageExists($url)
+    {
+        $response = $this->httpCient->head($url);
+        $statusCode = $response->getStatusCode();
+
+        return 200 === $statusCode;
     }
 
     /**

@@ -10,7 +10,8 @@
         "guzzlehttp/oauth-subscriber": "dev-master",
         "guzzlehttp/log-subscriber": "dev-master",
         "jms/serializer": "dev-master",
-        "monolog/monolog": "dev-master"
+        "monolog/monolog": "dev-master",
+        "symfony/debug": "dev-master"
     },
     "license": "MIT",
     "authors": [
