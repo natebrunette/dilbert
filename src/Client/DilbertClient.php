@@ -95,9 +95,9 @@ class DilbertClient
      *
      * @param RssItem $item
      *
-     * @return string
-     *
      * @throws NullPointerException
+     * @throws ResourceNotFoundException
+     * @return string
      */
     public function getImage(RssItem $item)
     {
