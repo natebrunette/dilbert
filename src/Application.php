@@ -19,6 +19,7 @@ use Tebru\DilbertPics\Client\TwitterClient;
 use Tebru\DilbertPics\Exception\InvalidArgumentException;
 use Tebru\DilbertPics\Model\RssItem;
 use Tebru\Executioner\Executor;
+use Tebru\Executioner\Strategy\ExponentialBackoffStrategy;
 use Tebru\Executioner\Strategy\StaticWaitStrategy;
 use Tebru\Executioner\Subscriber\LoggerSubscriber;
 use Tebru\Executioner\Subscriber\WaitSubscriber;
@@ -136,12 +137,9 @@ class Application
      */
     private function createDilbertExecutor()
     {
-        $loggerSubscriber = new LoggerSubscriber('rss', $this->logger);
-        $waitSubscriber = new WaitSubscriber(new StaticWaitStrategy(60));
-
         $executor = new Executor();
-        $executor->addSubscriber($loggerSubscriber);
-        $executor->addSubscriber($waitSubscriber);
+        $executor->addLogger('rss', $this->logger);
+        $executor->addWait(60);
 
         return $executor;
     }
@@ -166,11 +164,9 @@ class Application
      */
     private function createTwitterExecutor()
     {
-        $loggerSubscriber = new LoggerSubscriber('twitter', $this->logger);
-
         $executor = new Executor();
-        $executor->addSubscriber($loggerSubscriber);
-        $executor->addSubscriber(new WaitSubscriber());
+        $executor->addLogger('twittter', $this->logger);
+        $executor->addWaitStrategy(new ExponentialBackoffStrategy());
 
         return $executor;
     }
@@ -212,12 +208,9 @@ class Application
      */
     private function createBitlyExecutor()
     {
-        $loggerSubscriber = new LoggerSubscriber('bitly', $this->logger);
-        $waitSubscriber = new WaitSubscriber(new StaticWaitStrategy(2));
-
         $executor = new Executor();
-        $executor->addSubscriber($loggerSubscriber);
-        $executor->addSubscriber($waitSubscriber);
+        $executor->addLogger('bitly', $this->logger);
+        $executor->addWait(2);
 
         return $executor;
     }
