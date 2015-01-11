@@ -20,9 +20,6 @@ use Tebru\DilbertPics\Exception\InvalidArgumentException;
 use Tebru\DilbertPics\Model\RssItem;
 use Tebru\Executioner\Executor;
 use Tebru\Executioner\Strategy\ExponentialBackoffStrategy;
-use Tebru\Executioner\Strategy\StaticWaitStrategy;
-use Tebru\Executioner\Subscriber\LoggerSubscriber;
-use Tebru\Executioner\Subscriber\WaitSubscriber;
 
 /**
  * Class Application
