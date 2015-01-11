@@ -19,8 +19,9 @@ use Tebru\DilbertPics\Client\TwitterClient;
 use Tebru\DilbertPics\Exception\InvalidArgumentException;
 use Tebru\DilbertPics\Model\RssItem;
 use Tebru\Executioner\Executor;
-use Tebru\Executioner\Logger\ExceptionLogger;
-use Tebru\Executioner\Strategy\Wait\ExponentialWaitStrategy;
+use Tebru\Executioner\Strategy\StaticWaitStrategy;
+use Tebru\Executioner\Subscriber\LoggerSubscriber;
+use Tebru\Executioner\Subscriber\WaitSubscriber;
 
 /**
  * Class Application
@@ -73,35 +74,56 @@ class Application
             );
         }
 
-        $serializer = SerializerBuilder::create()->build();
-        $httpClient = new Client();
-        $dilbertClient = new DilbertClient($serializer, $httpClient);
-
-        $rssExecutor = $this->createRssExecutor();
-
         // get the latest rss item
+        $rssExecutor = $this->createDilbertExecutor();
+        $dilbertClient = $this->createDilbertClient();
+
         /** @var RssItem $rssItem */
-        $rssItem = $rssExecutor->execute(function () use ($dilbertClient) { return $dilbertClient->getItem(); });
+        $rssItem = $rssExecutor->execute(
+            30,
+            function () use ($dilbertClient) {
+                return $dilbertClient->getItem();
+            }
+        );
 
         // get the image from dilbert.com
-        $imageExecutor = $this->createImageExecutor();
-        $image = $imageExecutor->execute(function () use ($dilbertClient, $rssItem) { return $dilbertClient->getImage($rssItem); });
+        $imageExecutor = $this->createDilbertExecutor();
+        $image = $imageExecutor->execute(
+            30,
+            function () use ($dilbertClient, $rssItem) {
+                return $dilbertClient->getImage($rssItem);
+            }
+        );
 
-        // create new status
-        $bitlyExecutor = $this->createBitlyExecutor($arguments, $rssItem->getLink());
-        $twitterExecutor = $this->createTwitterExecutor();
+        // upload image
+        $twitterImageExecutor = $this->createTwitterExecutor();
         $twitterClient = $this->createTwitterClient($arguments);
-        $twitterExecutor->execute(
-            function () use ($twitterClient, $image, $bitlyExecutor, $rssItem) {
+        $mediaId = $twitterImageExecutor->execute(
+            15,
+            function () use ($twitterClient, $image) {
                 // upload image
-                $mediaId = $twitterClient->uploadImage($image);
+                return $twitterClient->uploadImage($image);
+            }
+        );
 
-                // attempt to get shortened url
-                $shortUrl = $bitlyExecutor->execute();
+        // create short url
+        $bitlyExecutor = $this->createBitlyExecutor($arguments, $rssItem->getLink());
+        $bitlyClient = $this->createBitlyClient($arguments);
+        $shortUrl = $bitlyExecutor->execute(
+            2,
+            function () use ($bitlyClient, $rssItem) {
+                return $bitlyClient->shorten($rssItem->getLink());
+            }
+        );
 
-                // create status
+        $twitterStatusExecutor = $this->createTwitterExecutor();
+        $twitterStatusExecutor->execute(
+            15,
+            function () use ($twitterClient, $mediaId, $shortUrl) {
+                // create message
                 $today = new DateTime();
                 $message = sprintf('Dilbert comic for %s %s', $today->format('M jS, Y'), $shortUrl);
+
                 $twitterClient->createStatusWithImage($mediaId, $message);
             }
         );
@@ -112,29 +134,29 @@ class Application
      *
      * @return Executor
      */
-    private function createRssExecutor()
+    private function createDilbertExecutor()
     {
-        $logger = new ExceptionLogger($this->logger, Logger::ERROR, 'Unable to get RSS Item');
+        $loggerSubscriber = new LoggerSubscriber('rss', $this->logger);
+        $waitSubscriber = new WaitSubscriber(new StaticWaitStrategy(60));
 
-        $executor = new Executor($logger);
-        $executor->sleep(60)->limit(30);
+        $executor = new Executor();
+        $executor->addSubscriber($loggerSubscriber);
+        $executor->addSubscriber($waitSubscriber);
 
         return $executor;
     }
 
     /**
-     * Create executor to get image from dilbert.com
+     * Create a dilbert client
      *
-     * @return Executor
+     * @return DilbertClient
      */
-    private function createImageExecutor()
+    private function createDilbertClient()
     {
-        $logger = new ExceptionLogger($this->logger, Logger::CRITICAL, 'Unable to get image');
+        $serializer = SerializerBuilder::create()->build();
+        $dilbertHttpClient = new Client();
 
-        $executor = new Executor($logger);
-        $executor->sleep(60)->limit(30);
-
-        return $executor;
+        return new DilbertClient($serializer, $dilbertHttpClient);
     }
 
     /**
@@ -144,11 +166,11 @@ class Application
      */
     private function createTwitterExecutor()
     {
-        $logger = new ExceptionLogger($this->logger, Logger::CRITICAL, 'Could not create twitter status');
-        $waitStrategy = new ExponentialWaitStrategy();
+        $loggerSubscriber = new LoggerSubscriber('twitter', $this->logger);
 
-        $executor = new Executor($logger, $waitStrategy);
-        $executor->limit(15);
+        $executor = new Executor();
+        $executor->addSubscriber($loggerSubscriber);
+        $executor->addSubscriber(new WaitSubscriber());
 
         return $executor;
     }
@@ -186,23 +208,30 @@ class Application
     /**
      * Create executor for bitly
      *
-     * @param array $arguments
-     * @param string $link
-     *
      * @return Executor
      */
-    private function createBitlyExecutor(array $arguments, $link)
+    private function createBitlyExecutor()
     {
-        $logger = new ExceptionLogger($this->logger, Logger::CRITICAL, 'Could not create bitly link');
+        $loggerSubscriber = new LoggerSubscriber('bitly', $this->logger);
+        $waitSubscriber = new WaitSubscriber(new StaticWaitStrategy(2));
 
-        $httpClient = new Client(['debug' => true]);
-        $bitlyClient = new BitlyClient($httpClient, $arguments[ArgumentEnum::BITLY_AUTH_TOKEN]);
-        $attemptor = function () use ($bitlyClient, $link) { return $bitlyClient->shorten($link); };
-
-        $executor = new Executor($logger, null, null, $attemptor);
-        $executor->sleep(2);
-        $executor->limit(2);
+        $executor = new Executor();
+        $executor->addSubscriber($loggerSubscriber);
+        $executor->addSubscriber($waitSubscriber);
 
         return $executor;
+    }
+
+    /**
+     * Create a bitly client
+     *
+     * @param array $arguments
+     * @return BitlyClient
+     */
+    private function createBitlyClient(array $arguments)
+    {
+        $bitlyHttpClient = new Client(['debug' => true]);
+
+        return new BitlyClient($bitlyHttpClient, $arguments[ArgumentEnum::BITLY_AUTH_TOKEN]);
     }
 } 

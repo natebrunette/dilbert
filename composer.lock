@@ -863,33 +863,93 @@
             "time": "2015-01-06 10:39:25"
         },
         {
+            "name": "symfony/event-dispatcher",
+            "version": "2.6.x-dev",
+            "target-dir": "Symfony/Component/EventDispatcher",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/EventDispatcher.git",
+                "reference": "40ff70cadea3785d83cac1c8309514b36113064e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/EventDispatcher/zipball/40ff70cadea3785d83cac1c8309514b36113064e",
+                "reference": "40ff70cadea3785d83cac1c8309514b36113064e",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "require-dev": {
+                "psr/log": "~1.0",
+                "symfony/config": "~2.0,>=2.0.5",
+                "symfony/dependency-injection": "~2.6",
+                "symfony/expression-language": "~2.6",
+                "symfony/stopwatch": "~2.3"
+            },
+            "suggest": {
+                "symfony/dependency-injection": "",
+                "symfony/http-kernel": ""
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.6-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Symfony\\Component\\EventDispatcher\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Symfony Community",
+                    "homepage": "http://symfony.com/contributors"
+                },
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                }
+            ],
+            "description": "Symfony EventDispatcher Component",
+            "homepage": "http://symfony.com",
+            "time": "2015-01-05 14:28:40"
+        },
+        {
             "name": "tebru/executioner",
             "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tebru/executioner.git",
-                "reference": "9c36de9b49d0d5380baa4d7c25871cb64b654aa4"
+                "reference": "cc8146ed3f531a9996de6c865e2acf384d63aff6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tebru/executioner/zipball/9c36de9b49d0d5380baa4d7c25871cb64b654aa4",
-                "reference": "9c36de9b49d0d5380baa4d7c25871cb64b654aa4",
+                "url": "https://api.github.com/repos/tebru/executioner/zipball/cc8146ed3f531a9996de6c865e2acf384d63aff6",
+                "reference": "cc8146ed3f531a9996de6c865e2acf384d63aff6",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.4",
-                "psr/log": "1.0.*"
+                "psr/log": "1.0.*",
+                "symfony/event-dispatcher": "2.6.*"
             },
             "require-dev": {
+                "akamon/mockery-callable-mock": "dev-master",
                 "mockery/mockery": "dev-master",
                 "php": ">=5.5",
-                "phpunit/phpunit": "dev-master"
+                "phpunit/phpunit": "4.4.*"
             },
             "type": "library",
             "autoload": {
                 "psr-4": {
                     "Tebru\\Executioner\\": "src/",
-                    "Tebru\\Executioner\\Test\\": "tests/UnitTests"
+                    "Tebru\\Executioner\\Test\\": "tests/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -903,7 +963,7 @@
                 }
             ],
             "description": "Provides a library for handling PHP exceptions when you would like to retry execution.",
-            "time": "2015-01-11 07:38:32"
+            "time": "2015-01-11 15:00:16"
         }
     ],
     "packages-dev": [],
