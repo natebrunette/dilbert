@@ -10,6 +10,7 @@ use DateTimeZone;
 use DOMDocument;
 use DOMElement;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Message\Response;
 use JMS\Serializer\SerializerInterface;
 use Tebru\DilbertPics\Exception\NoNewPublicationException;
 use Tebru\DilbertPics\Exception\NullPointerException;
@@ -103,11 +104,6 @@ class DilbertClient
     {
         $link = $item->getLink();
 
-        // check if image exists
-        if (!$this->pageExists($link)) {
-            throw new ResourceNotFoundException('Image does not exist');
-        }
-
         $webpage = file_get_contents($link);
         $html = new DOMDocument();
 
@@ -133,6 +129,12 @@ class DilbertClient
             throw new NullPointerException('Could not get image from page');
         }
 
+        // check if image exists
+        if (!$this->imageExists($src)) {
+            throw new ResourceNotFoundException('Image does not exist');
+        }
+
+
         return base64_encode(file_get_contents($src));
     }
 
@@ -143,12 +145,12 @@ class DilbertClient
      *
      * @return bool
      */
-    private function pageExists($url)
+    private function imageExists($url)
     {
         $response = $this->httpCient->head($url);
-        $statusCode = $response->getStatusCode();
+        $contentType = $response->getHeader('Content-Type');
 
-        return 200 === $statusCode;
+        return 'image/gif' === $contentType;
     }
 
     /**
