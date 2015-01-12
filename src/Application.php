@@ -18,7 +18,7 @@ use Tebru\DilbertPics\Client\DilbertClient;
 use Tebru\DilbertPics\Client\TwitterClient;
 use Tebru\DilbertPics\Exception\InvalidArgumentException;
 use Tebru\DilbertPics\Model\RssItem;
-use Tebru\Executioner\Executor;
+use Tebru\Executioner\Factory\ExecutorFactory;
 use Tebru\Executioner\Strategy\ExponentialBackoffStrategy;
 
 /**
@@ -72,8 +72,10 @@ class Application
             );
         }
 
+        $executorFactory = new ExecutorFactory();
+
         // get the latest rss item
-        $rssExecutor = $this->createDilbertExecutor();
+        $rssExecutor = $executorFactory->make('rss', $this->logger, 60);
         $dilbertClient = $this->createDilbertClient();
 
         /** @var RssItem $rssItem */
@@ -85,7 +87,7 @@ class Application
         );
 
         // get the image from dilbert.com
-        $imageExecutor = $this->createDilbertExecutor();
+        $imageExecutor = $executorFactory->make('image', $this->logger, 60);
         $image = $imageExecutor->execute(
             30,
             function () use ($dilbertClient, $rssItem) {
@@ -94,18 +96,17 @@ class Application
         );
 
         // upload image
-        $twitterImageExecutor = $this->createTwitterExecutor();
+        $twitterImageExecutor = $executorFactory->make('twitter-image', $this->logger, new ExponentialBackoffStrategy());
         $twitterClient = $this->createTwitterClient($arguments);
         $mediaId = $twitterImageExecutor->execute(
             15,
             function () use ($twitterClient, $image) {
-                // upload image
                 return $twitterClient->uploadImage($image);
             }
         );
 
         // create short url
-        $bitlyExecutor = $this->createBitlyExecutor($arguments, $rssItem->getLink());
+        $bitlyExecutor = $executorFactory->make('bitly', $this->logger, 2);
         $bitlyClient = $this->createBitlyClient($arguments);
         $shortUrl = $bitlyExecutor->execute(
             2,
@@ -114,7 +115,7 @@ class Application
             }
         );
 
-        $twitterStatusExecutor = $this->createTwitterExecutor();
+        $twitterStatusExecutor = $executorFactory->make('twitter-status', $this->logger, new ExponentialBackoffStrategy());
         $twitterStatusExecutor->execute(
             15,
             function () use ($twitterClient, $mediaId, $shortUrl) {
@@ -128,20 +129,6 @@ class Application
     }
 
     /**
-     * Create executor to poll rss feed
-     *
-     * @return Executor
-     */
-    private function createDilbertExecutor()
-    {
-        $executor = new Executor();
-        $executor->addLogger('rss', $this->logger);
-        $executor->addWait(60);
-
-        return $executor;
-    }
-
-    /**
      * Create a dilbert client
      *
      * @return DilbertClient
@@ -152,20 +139,6 @@ class Application
         $dilbertHttpClient = new Client();
 
         return new DilbertClient($serializer, $dilbertHttpClient);
-    }
-
-    /**
-     * Create executor for twitter
-     *
-     * @return Executor
-     */
-    private function createTwitterExecutor()
-    {
-        $executor = new Executor();
-        $executor->addLogger('twittter', $this->logger);
-        $executor->addWaitStrategy(new ExponentialBackoffStrategy());
-
-        return $executor;
     }
 
     /**
@@ -196,20 +169,6 @@ class Application
         $httpClient->getEmitter()->attach($logSubscriber);
 
         return new TwitterClient($httpClient);
-    }
-
-    /**
-     * Create executor for bitly
-     *
-     * @return Executor
-     */
-    private function createBitlyExecutor()
-    {
-        $executor = new Executor();
-        $executor->addLogger('bitly', $this->logger);
-        $executor->addWait(2);
-
-        return $executor;
     }
 
     /**
