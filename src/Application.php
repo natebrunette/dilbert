@@ -72,13 +72,18 @@ class Application
             );
         }
 
+        // create executor
+        $executor = ExecutorFactory::make();
+
         // get the latest rss item
-        $rssExecutor = ExecutorFactory::make('rss', $this->logger, 60);
+        $executor->setWait(60);
+        $executor->setLogger('rss', $this->logger);
+
         $dilbertClient = $this->createDilbertClient();
 
         /** @var RssItem $rssItem */
         $this->logger->info('Starting RSS feed execution');
-        $rssItem = $rssExecutor->execute(
+        $rssItem = $executor->execute(
             30,
             function () use ($dilbertClient) {
                 return $dilbertClient->getItem();
@@ -86,9 +91,10 @@ class Application
         );
 
         // get the image from dilbert.com
-        $imageExecutor = ExecutorFactory::make('image', $this->logger, 60);
+        $executor->setLogger('image', $this->logger);
+
         $this->logger->info('Starting image fetching');
-        $image = $imageExecutor->execute(
+        $image = $executor->execute(
             30,
             function () use ($dilbertClient, $rssItem) {
                 return $dilbertClient->getImage($rssItem);
@@ -96,10 +102,12 @@ class Application
         );
 
         // upload image
-        $twitterImageExecutor = ExecutorFactory::make('twitter-image', $this->logger, new ExponentialBackoffStrategy());
+        $executor->setLogger('twitter-image', $this->logger);
+        $executor->setWaitStrategy(new ExponentialBackoffStrategy());
+
         $twitterClient = $this->createTwitterClient($arguments);
         $this->logger->info('Starting Twitter image uploading');
-        $mediaId = $twitterImageExecutor->execute(
+        $mediaId = $executor->execute(
             15,
             function () use ($twitterClient, $image) {
                 return $twitterClient->uploadImage($image);
@@ -107,19 +115,23 @@ class Application
         );
 
         // create short url
-        $bitlyExecutor = ExecutorFactory::make('bitly', $this->logger, 2);
+        $executor->setLogger('bitly', $this->logger);
+        $executor->setWait(2);
+
         $bitlyClient = $this->createBitlyClient($arguments);
         $this->logger->info('Starting URL shortening');
-        $shortUrl = $bitlyExecutor->execute(
+        $shortUrl = $executor->execute(
             2,
             function () use ($bitlyClient, $rssItem) {
                 return $bitlyClient->shorten($rssItem->getLink());
             }
         );
 
-        $twitterStatusExecutor = ExecutorFactory::make('twitter-status', $this->logger, new ExponentialBackoffStrategy());
+        $executor->setLogger('twitter-status', $this->logger);
+        $executor->setWaitStrategy(new ExponentialBackoffStrategy());
+
         $this->logger->info('Starting Twitter status update');
-        $twitterStatusExecutor->execute(
+        $executor->execute(
             15,
             function () use ($twitterClient, $mediaId, $shortUrl) {
                 // create message
