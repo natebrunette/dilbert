@@ -91,7 +91,7 @@ class Application
         );
 
         // get the image from dilbert.com
-        $executor->setLogger('image', $this->logger);
+        $executor->updateLoggerName('image');
 
         $this->logger->info('Starting image fetching');
         $image = $executor->execute(
@@ -102,7 +102,7 @@ class Application
         );
 
         // upload image
-        $executor->setLogger('twitter-image', $this->logger);
+        $executor->updateLoggerName('twitter-image');
         $executor->setWaitStrategy(new ExponentialBackoffStrategy());
 
         $twitterClient = $this->createTwitterClient($arguments);
@@ -115,7 +115,7 @@ class Application
         );
 
         // create short url
-        $executor->setLogger('bitly', $this->logger);
+        $executor->updateLoggerName('bitly');
         $executor->setWait(2);
 
         $bitlyClient = $this->createBitlyClient($arguments);
@@ -127,7 +127,7 @@ class Application
             }
         );
 
-        $executor->setLogger('twitter-status', $this->logger);
+        $executor->updateLoggerName('twitter-status');
         $executor->setWaitStrategy(new ExponentialBackoffStrategy());
 
         $this->logger->info('Starting Twitter status update');
