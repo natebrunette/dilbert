@@ -10,12 +10,12 @@ use DateTimeZone;
 use DOMDocument;
 use DOMElement;
 use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Message\Response;
 use JMS\Serializer\SerializerInterface;
 use Tebru\DilbertPics\Exception\NoNewPublicationException;
 use Tebru\DilbertPics\Exception\NullPointerException;
 use Tebru\DilbertPics\Exception\ResourceNotFoundException;
 use Tebru\DilbertPics\Model\RssItem;
+use Tebru\Log\Loggable;
 use XMLReader;
 
 /**
@@ -27,6 +27,8 @@ use XMLReader;
  */
 class DilbertClient
 {
+    use Loggable;
+
     /**
      * RSS Url
      */
@@ -82,6 +84,8 @@ class DilbertClient
         $rssItem = $this->serializer->deserialize($xmlNode->asXML(), RssItem::class, 'xml');
         $rssItem->setPublishedTimezone();
 
+        $this->getLogger()->debug('RSS Item', ['item' => $rssItem]);
+
         if(!$this->hasNewPublication($rssItem)) {
             throw new NoNewPublicationException('There is not a new publication');
         }
@@ -125,6 +129,8 @@ class DilbertClient
             }
         }
 
+        $this->getLogger()->debug('Image source url: ' . $src);
+
         if (null === $src) {
             throw new NullPointerException('Could not get image from page');
         }
@@ -150,6 +156,8 @@ class DilbertClient
         $response = $this->httpCient->head($url);
         $contentType = $response->getHeader('Content-Type');
 
+        $this->getLogger()->debug('Content type' . $contentType, ['url' => $url]);
+
         return 'image/gif' === $contentType;
     }
 
@@ -170,6 +178,9 @@ class DilbertClient
 
         $dateToday = $today->format('Y-m-d');
         $feedDateToday = $rssItem->getPublishedDate()->format('Y-m-d');
+
+        $this->getLogger()->debug('Date today: ' . $dateToday);
+        $this->getLogger()->debug('Feed date: ' . $feedDateToday);
 
         return $dateToday === $feedDateToday;
     }

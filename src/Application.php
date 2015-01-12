@@ -79,6 +79,7 @@ class Application
         $dilbertClient = $this->createDilbertClient();
 
         /** @var RssItem $rssItem */
+        $this->logger->info('Starting RSS feed execution');
         $rssItem = $rssExecutor->execute(
             30,
             function () use ($dilbertClient) {
@@ -88,6 +89,7 @@ class Application
 
         // get the image from dilbert.com
         $imageExecutor = $executorFactory->make('image', $this->logger, 60);
+        $this->logger->info('Starting image fetching');
         $image = $imageExecutor->execute(
             30,
             function () use ($dilbertClient, $rssItem) {
@@ -98,6 +100,7 @@ class Application
         // upload image
         $twitterImageExecutor = $executorFactory->make('twitter-image', $this->logger, new ExponentialBackoffStrategy());
         $twitterClient = $this->createTwitterClient($arguments);
+        $this->logger->info('Starting Twitter image uploading');
         $mediaId = $twitterImageExecutor->execute(
             15,
             function () use ($twitterClient, $image) {
@@ -108,6 +111,7 @@ class Application
         // create short url
         $bitlyExecutor = $executorFactory->make('bitly', $this->logger, 2);
         $bitlyClient = $this->createBitlyClient($arguments);
+        $this->logger->info('Starting URL shortening');
         $shortUrl = $bitlyExecutor->execute(
             2,
             function () use ($bitlyClient, $rssItem) {
@@ -116,6 +120,7 @@ class Application
         );
 
         $twitterStatusExecutor = $executorFactory->make('twitter-status', $this->logger, new ExponentialBackoffStrategy());
+        $this->logger->info('Starting Twitter status update');
         $twitterStatusExecutor->execute(
             15,
             function () use ($twitterClient, $mediaId, $shortUrl) {
@@ -138,7 +143,10 @@ class Application
         $serializer = SerializerBuilder::create()->build();
         $dilbertHttpClient = new Client();
 
-        return new DilbertClient($serializer, $dilbertHttpClient);
+        $client = new DilbertClient($serializer, $dilbertHttpClient);
+        $client->setLogger($this->logger);
+
+        return $client;
     }
 
     /**
@@ -168,7 +176,10 @@ class Application
         $httpClient->getEmitter()->attach($oauth);
         $httpClient->getEmitter()->attach($logSubscriber);
 
-        return new TwitterClient($httpClient);
+        $client = new TwitterClient($httpClient);
+        $client->setLogger($this->logger);
+
+        return $client;
     }
 
     /**
@@ -181,6 +192,9 @@ class Application
     {
         $bitlyHttpClient = new Client(['debug' => true]);
 
-        return new BitlyClient($bitlyHttpClient, $arguments[ArgumentEnum::BITLY_AUTH_TOKEN]);
+        $client = new BitlyClient($bitlyHttpClient, $arguments[ArgumentEnum::BITLY_AUTH_TOKEN]);
+        $client->setLogger($this->logger);
+
+        return $client;
     }
 } 

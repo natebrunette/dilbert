@@ -7,6 +7,7 @@ namespace Tebru\DilbertPics\Client;
 
 use GuzzleHttp\ClientInterface;
 use Tebru\DilbertPics\Exception\NullPointerException;
+use Tebru\Log\Loggable;
 
 /**
  * Class TwitterClient
@@ -17,6 +18,8 @@ use Tebru\DilbertPics\Exception\NullPointerException;
  */
 class TwitterClient
 {
+    use Loggable;
+
     /**
      * Upload api base url
      */
@@ -79,6 +82,8 @@ class TwitterClient
         }
 
         $mediaId = $response['media_id'];
+
+        $this->getLogger()->debug('Twitter media id: ' . $mediaId);
 
         return $mediaId;
     }

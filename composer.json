@@ -6,6 +6,7 @@
         "ext-spl_types": "*",
 
         "tebru/executioner": "dev-master",
+        "tebru/loggable": "dev-master",
         "guzzlehttp/guzzle": "dev-master",
         "guzzlehttp/oauth-subscriber": "dev-master",
         "guzzlehttp/log-subscriber": "dev-master",

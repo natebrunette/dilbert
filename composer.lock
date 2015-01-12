@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "559535f944cd2f0392d56d0ba66b6235",
+    "hash": "cae82fb5db5ada5d8e06be8e2d198d21",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -964,6 +964,43 @@
             ],
             "description": "Provides a library for handling PHP exceptions when you would like to retry execution.",
             "time": "2015-01-12 16:42:15"
+        },
+        {
+            "name": "tebru/loggable",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tebru/loggable.git",
+                "reference": "d1151e8f20c5d05a5e9ab6eec3c36ca1e176b605"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tebru/loggable/zipball/d1151e8f20c5d05a5e9ab6eec3c36ca1e176b605",
+                "reference": "d1151e8f20c5d05a5e9ab6eec3c36ca1e176b605",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">= 5.4",
+                "psr/log": "1.0.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Tebru\\Log\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nate Brunette",
+                    "email": "n@tebru.net"
+                }
+            ],
+            "description": "A logger trait for PHP",
+            "time": "2015-01-12 17:08:26"
         }
     ],
     "packages-dev": [],
@@ -971,6 +1008,7 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "tebru/executioner": 20,
+        "tebru/loggable": 20,
         "guzzlehttp/guzzle": 20,
         "guzzlehttp/oauth-subscriber": 20,
         "guzzlehttp/log-subscriber": 20,

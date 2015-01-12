@@ -6,6 +6,7 @@
 namespace Tebru\DilbertPics\Client;
 
 use GuzzleHttp\ClientInterface;
+use Tebru\Log\Loggable;
 
 /**
  * Class BitlyClient
@@ -16,6 +17,8 @@ use GuzzleHttp\ClientInterface;
  */
 class BitlyClient
 {
+    use Loggable;
+
     /**
      * API base url
      */
@@ -65,6 +68,8 @@ class BitlyClient
 
         // because we're formatting with 'txt', the response is just the url
         $body = (string)$response->getBody();
+
+        $this->getLogger()->debug('Bit.ly url: ' . $body);
 
         return $body;
     }
