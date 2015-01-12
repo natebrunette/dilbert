@@ -926,12 +926,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tebru/executioner.git",
-                "reference": "010dff9ed67eeb295eb337aa61b42a10a7825831"
+                "reference": "fd9076b226636f5f03ed3e560d7a364f850d9e0a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tebru/executioner/zipball/010dff9ed67eeb295eb337aa61b42a10a7825831",
-                "reference": "010dff9ed67eeb295eb337aa61b42a10a7825831",
+                "url": "https://api.github.com/repos/tebru/executioner/zipball/fd9076b226636f5f03ed3e560d7a364f850d9e0a",
+                "reference": "fd9076b226636f5f03ed3e560d7a364f850d9e0a",
                 "shasum": ""
             },
             "require": {
@@ -963,7 +963,7 @@
                 }
             ],
             "description": "Provides a library for handling PHP exceptions when you would like to retry execution.",
-            "time": "2015-01-12 16:42:15"
+            "time": "2015-01-12 18:29:26"
         },
         {
             "name": "tebru/loggable",

@@ -72,10 +72,8 @@ class Application
             );
         }
 
-        $executorFactory = new ExecutorFactory();
-
         // get the latest rss item
-        $rssExecutor = $executorFactory->make('rss', $this->logger, 60);
+        $rssExecutor = ExecutorFactory::make('rss', $this->logger, 60);
         $dilbertClient = $this->createDilbertClient();
 
         /** @var RssItem $rssItem */
@@ -88,7 +86,7 @@ class Application
         );
 
         // get the image from dilbert.com
-        $imageExecutor = $executorFactory->make('image', $this->logger, 60);
+        $imageExecutor = ExecutorFactory::make('image', $this->logger, 60);
         $this->logger->info('Starting image fetching');
         $image = $imageExecutor->execute(
             30,
@@ -98,7 +96,7 @@ class Application
         );
 
         // upload image
-        $twitterImageExecutor = $executorFactory->make('twitter-image', $this->logger, new ExponentialBackoffStrategy());
+        $twitterImageExecutor = ExecutorFactory::make('twitter-image', $this->logger, new ExponentialBackoffStrategy());
         $twitterClient = $this->createTwitterClient($arguments);
         $this->logger->info('Starting Twitter image uploading');
         $mediaId = $twitterImageExecutor->execute(
@@ -109,7 +107,7 @@ class Application
         );
 
         // create short url
-        $bitlyExecutor = $executorFactory->make('bitly', $this->logger, 2);
+        $bitlyExecutor = ExecutorFactory::make('bitly', $this->logger, 2);
         $bitlyClient = $this->createBitlyClient($arguments);
         $this->logger->info('Starting URL shortening');
         $shortUrl = $bitlyExecutor->execute(
@@ -119,7 +117,7 @@ class Application
             }
         );
 
-        $twitterStatusExecutor = $executorFactory->make('twitter-status', $this->logger, new ExponentialBackoffStrategy());
+        $twitterStatusExecutor = ExecutorFactory::make('twitter-status', $this->logger, new ExponentialBackoffStrategy());
         $this->logger->info('Starting Twitter status update');
         $twitterStatusExecutor->execute(
             15,
