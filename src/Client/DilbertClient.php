@@ -115,7 +115,7 @@ class DilbertClient
         // look for all images and grab the comic based on regex of src attribute
         $images = $html->getElementsByTagName('img');
         $src = null;
-        $regex = '/(?:http:).+(?:strip(?:.sunday)\.gif)/';
+        $regex = '/(?:http:).+(?:strip(?:\.sunday)?\.gif)/';
 
         /** @var DOMElement $image */
         foreach ($images as $image) {
