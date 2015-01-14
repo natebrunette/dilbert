@@ -10,14 +10,12 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Subscriber\Log\Formatter;
 use GuzzleHttp\Subscriber\Log\LogSubscriber;
 use GuzzleHttp\Subscriber\Oauth\Oauth1;
-use JMS\Serializer\SerializerBuilder;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use Tebru\DilbertPics\Client\BitlyClient;
 use Tebru\DilbertPics\Client\DilbertClient;
 use Tebru\DilbertPics\Client\TwitterClient;
 use Tebru\DilbertPics\Exception\InvalidArgumentException;
-use Tebru\DilbertPics\Model\RssItem;
 use Tebru\Executioner\Factory\ExecutorFactory;
 use Tebru\Executioner\Strategy\ExponentialBackoffStrategy;
 
@@ -75,29 +73,17 @@ class Application
         // create executor
         $executor = ExecutorFactory::make();
 
-        // get the latest rss item
+        // get the image from the web page
         $executor->setWait(60);
-        $executor->setLogger('rss', $this->logger);
+        $executor->setLogger('image', $this->logger);
 
         $dilbertClient = $this->createDilbertClient();
-
-        /** @var RssItem $rssItem */
-        $this->logger->info('Starting RSS feed execution');
-        $rssItem = $executor->execute(
-            30,
-            function () use ($dilbertClient) {
-                return $dilbertClient->getItem();
-            }
-        );
-
-        // get the image from dilbert.com
-        $executor->updateLoggerName('image');
 
         $this->logger->info('Starting image fetching');
         $image = $executor->execute(
             30,
-            function () use ($dilbertClient, $rssItem) {
-                return $dilbertClient->getImage($rssItem);
+            function () use ($dilbertClient) {
+                return $dilbertClient->getImage();
             }
         );
 
@@ -122,8 +108,8 @@ class Application
         $this->logger->info('Starting URL shortening');
         $shortUrl = $executor->execute(
             2,
-            function () use ($bitlyClient, $rssItem) {
-                return $bitlyClient->shorten($rssItem->getLink());
+            function () use ($bitlyClient, $dilbertClient) {
+                return $bitlyClient->shorten($dilbertClient->getUrl());
             }
         );
 
@@ -150,10 +136,7 @@ class Application
      */
     private function createDilbertClient()
     {
-        $serializer = SerializerBuilder::create()->build();
-        $dilbertHttpClient = new Client();
-
-        $client = new DilbertClient($serializer, $dilbertHttpClient);
+        $client = new DilbertClient(new Client());
         $client->setLogger($this->logger);
 
         return $client;

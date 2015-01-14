@@ -1,6 +1,5 @@
 <?php
 
-use Doctrine\Common\Annotations\AnnotationRegistry;
 use Monolog\Handler\NativeMailerHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -14,9 +13,6 @@ const LOG_MESSAGE = 'An error occurred';
 const LOG_EMAIL_FROM = 'system@dilbertpics.com';
 
 require 'vendor/autoload.php';
-
-AnnotationRegistry::registerAutoloadNamespace('JMS\Serializer\Annotation', __DIR__ . '/vendor/jms/serializer/src');
-
 
 $logger = new Logger(LOG_NAME);
 $logger->pushHandler(new StreamHandler(__DIR__ . LOG_LOCATION));
