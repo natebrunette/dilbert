@@ -59,7 +59,7 @@ class DilbertClient
         $link = $this->getUrl();
 
         // check if image exists
-        if (!$this->pageExists($link)) {
+        if (!$this->resourceExists($link)) {
             throw new ResourceNotFoundException('Web page does not exist');
         }
 
@@ -90,7 +90,7 @@ class DilbertClient
         }
 
         // check if image exists
-        if (!$this->imageExists($src)) {
+        if (!$this->resourceExists($src)) {
             throw new ResourceNotFoundException('Image does not exist');
         }
 
@@ -119,7 +119,7 @@ class DilbertClient
      *
      * @return bool
      */
-    private function pageExists($url)
+    private function resourceExists($url)
     {
         $response = $this->httpCient->head($url);
         $responseCode = $response->getStatusCode();
@@ -127,23 +127,6 @@ class DilbertClient
         $this->getLogger()->debug('Status Code: ' . $responseCode, ['url' => $url]);
 
         return 200 === $responseCode;
-    }
-
-    /**
-     * Ensure web page exists
-     *
-     * @param string $url
-     *
-     * @return bool
-     */
-    private function imageExists($url)
-    {
-        $response = $this->httpCient->head($url);
-        $contentType = $response->getHeader('Content-Type');
-
-        $this->getLogger()->debug('Content type' . $contentType, ['url' => $url]);
-
-        return 'image/gif' === $contentType;
     }
 
     /**

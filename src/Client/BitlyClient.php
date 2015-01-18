@@ -31,9 +31,9 @@ class BitlyClient
     /**#@-*/
 
     /**
-     * @var ClientInterface $httpclient
+     * @var ClientInterface $httpClient
      */
-    private $httpclient;
+    private $httpClient;
 
     /**
      * The api auth token
@@ -49,7 +49,7 @@ class BitlyClient
      */
     public function __construct(ClientInterface $httpclient, $authToken)
     {
-        $this->httpclient = $httpclient;
+        $this->httpClient = $httpclient;
         $this->authToken = $authToken;
     }
 
@@ -64,7 +64,7 @@ class BitlyClient
     {
         $url = $this->createUrl(self::ENDPOINT_SHORTEN);
         $options['query'] = ['access_token' => $this->authToken, 'longUrl' => $longUrl, 'format' => 'txt'];
-        $response = $this->httpclient->get($url,$options);
+        $response = $this->httpClient->get($url,$options);
 
         // because we're formatting with 'txt', the response is just the url
         $body = (string)$response->getBody();
