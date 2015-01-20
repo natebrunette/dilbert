@@ -15,9 +15,13 @@ use Psr\Log\LoggerInterface;
 use Tebru\DilbertPics\Client\BitlyClient;
 use Tebru\DilbertPics\Client\DilbertClient;
 use Tebru\DilbertPics\Client\TwitterClient;
+use Tebru\DilbertPics\Client\TwitterUploadClient;
 use Tebru\DilbertPics\Exception\InvalidArgumentException;
+use Tebru\DilbertPics\Exception\NullPointerException;
 use Tebru\Executioner\Factory\ExecutorFactory;
 use Tebru\Executioner\Strategy\ExponentialBackoffStrategy;
+use Tebru\Retrofit\Adapter\RestAdapter;
+use Tebru\Retrofit\RequestInterceptor;
 
 /**
  * Class Application
@@ -91,14 +95,20 @@ class Application
         $executor->updateLoggerName('twitter-image');
         $executor->setWaitStrategy(new ExponentialBackoffStrategy());
 
-        $twitterClient = $this->createTwitterClient($arguments);
+        $twitterUploadClient = $this->createTwitterUploadClient($arguments);
         $this->logger->info('Starting Twitter image uploading');
-        $mediaId = $executor->execute(
+        $response = $executor->execute(
             15,
-            function () use ($twitterClient, $image) {
-                return $twitterClient->uploadImage($image);
+            function () use ($twitterUploadClient, $image) {
+                return $twitterUploadClient->uploadImage($image);
             }
         );
+
+        if (!isset($response['media_id'])) {
+            throw new NullPointerException('Media id not set on response');
+        }
+
+        $mediaId = $response['media_id'];
 
         // create short url
         $executor->updateLoggerName('bitly');
@@ -116,6 +126,7 @@ class Application
         $executor->updateLoggerName('twitter-status');
         $executor->setWaitStrategy(new ExponentialBackoffStrategy());
 
+        $twitterClient = $this->createTwitterClient($arguments);
         $this->logger->info('Starting Twitter status update');
         $executor->execute(
             15,
@@ -143,6 +154,24 @@ class Application
     }
 
     /**
+     * Create twitter upload client
+     *
+     * @param array $arguments
+     *
+     * @return TwitterUploadClient
+     */
+    private function createTwitterUploadClient(array $arguments)
+    {
+        $httpClient = $this->getTwitterClient($arguments);
+
+        return RestAdapter::builder()
+            ->setBaseUrl('https://upload.twitter.com/1.1')
+            ->setHttpClient($httpClient)
+            ->build()
+            ->create(TwitterUploadClient::class);
+    }
+
+    /**
      * Create twitter client
      *
      * @param array $arguments
@@ -150,6 +179,23 @@ class Application
      * @return TwitterClient
      */
     private function createTwitterClient(array $arguments)
+    {
+        $httpClient = $this->getTwitterClient($arguments);
+
+        return RestAdapter::builder()
+            ->setBaseUrl('https://api.twitter.com/1.1')
+            ->setHttpClient($httpClient)
+            ->build()
+            ->create(TwitterClient::class);
+    }
+
+    /**
+     * Create twitter http client
+     *
+     * @param array $arguments
+     * @return Client
+     */
+    private function getTwitterClient(array $arguments)
     {
         $consumerKey = $arguments[ArgumentEnum::TWITTER_CONSUMER_KEY];
         $consumerSecret = $arguments[ArgumentEnum::TWITTER_CONSUMER_SECRET];
@@ -169,10 +215,8 @@ class Application
         $httpClient->getEmitter()->attach($oauth);
         $httpClient->getEmitter()->attach($logSubscriber);
 
-        $client = new TwitterClient($httpClient);
-        $client->setLogger($this->logger);
+        return $httpClient;
 
-        return $client;
     }
 
     /**
@@ -183,11 +227,19 @@ class Application
      */
     private function createBitlyClient(array $arguments)
     {
-        $bitlyHttpClient = new Client(['debug' => true]);
+        $requestInterceptor = new RequestInterceptor();
+        $requestInterceptor->addQuery('access_token', $arguments[ArgumentEnum::BITLY_AUTH_TOKEN]);
 
-        $client = new BitlyClient($bitlyHttpClient, $arguments[ArgumentEnum::BITLY_AUTH_TOKEN]);
-        $client->setLogger($this->logger);
+        $logSubscriber = new LogSubscriber($this->logger, Formatter::DEBUG);
 
-        return $client;
+        $httpClient = new Client(['debug' => true]);
+        $httpClient->getEmitter()->attach($logSubscriber);
+
+        return RestAdapter::builder()
+            ->setBaseUrl('https://api-ssl.bitly.com')
+            ->setHttpClient($httpClient)
+            ->setRequestInterceptor($requestInterceptor)
+            ->build()
+            ->create(BitlyClient::class);
     }
 } 
