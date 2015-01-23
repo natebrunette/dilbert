@@ -7,6 +7,7 @@ namespace Tebru\DilbertPics;
 
 use DateTime;
 use GuzzleHttp\Client;
+use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\Subscriber\Log\Formatter;
 use GuzzleHttp\Subscriber\Log\LogSubscriber;
 use GuzzleHttp\Subscriber\Oauth\Oauth1;
@@ -21,7 +22,6 @@ use Tebru\DilbertPics\Exception\NullPointerException;
 use Tebru\Executioner\Factory\ExecutorFactory;
 use Tebru\Executioner\Strategy\ExponentialBackoffStrategy;
 use Tebru\Retrofit\Adapter\RestAdapter;
-use Tebru\Retrofit\RequestInterceptor;
 
 /**
  * Class Application
@@ -227,19 +227,18 @@ class Application
      */
     private function createBitlyClient(array $arguments)
     {
-        $requestInterceptor = new RequestInterceptor();
-        $requestInterceptor->addQuery('access_token', $arguments[ArgumentEnum::BITLY_AUTH_TOKEN]);
-
         $logSubscriber = new LogSubscriber($this->logger, Formatter::DEBUG);
 
         $httpClient = new Client(['debug' => true]);
         $httpClient->getEmitter()->attach($logSubscriber);
+        $httpClient->getEmitter()->on('before', function (BeforeEvent $event) use ($arguments) {
+            $event->getRequest()->getQuery()->add('access_token', $arguments[ArgumentEnum::BITLY_AUTH_TOKEN]);
+        });
 
-        return RestAdapter::builder()
+        $builder = RestAdapter::builder()
             ->setBaseUrl('https://api-ssl.bitly.com')
-            ->setHttpClient($httpClient)
-            ->setRequestInterceptor($requestInterceptor)
-            ->build()
-            ->create(BitlyClient::class);
+            ->setHttpClient($httpClient);
+
+        return $builder->build()->create(BitlyClient::class);
     }
 } 

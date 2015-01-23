@@ -1086,6 +1086,63 @@
             "time": "2014-12-30 13:32:42"
         },
         {
+            "name": "symfony/console",
+            "version": "2.6.x-dev",
+            "target-dir": "Symfony/Component/Console",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/Console.git",
+                "reference": "c483805ec0189376fa7a8427a059c64fc7238944"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/Console/zipball/c483805ec0189376fa7a8427a059c64fc7238944",
+                "reference": "c483805ec0189376fa7a8427a059c64fc7238944",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "require-dev": {
+                "psr/log": "~1.0",
+                "symfony/event-dispatcher": "~2.1",
+                "symfony/process": "~2.1"
+            },
+            "suggest": {
+                "psr/log": "For using the console logger",
+                "symfony/event-dispatcher": "",
+                "symfony/process": ""
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.6-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Symfony\\Component\\Console\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Symfony Community",
+                    "homepage": "http://symfony.com/contributors"
+                },
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                }
+            ],
+            "description": "Symfony Console Component",
+            "homepage": "http://symfony.com",
+            "time": "2015-01-20 01:40:20"
+        },
+        {
             "name": "symfony/debug",
             "version": "dev-master",
             "target-dir": "Symfony/Component/Debug",
@@ -1338,27 +1395,38 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tebru/retrofit-php.git",
-                "reference": "f999367014d2c3af173cf111245f34ca00b48187"
+                "reference": "55228d0bdecc0951579aeb16c50c072c10133d82"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tebru/retrofit-php/zipball/f999367014d2c3af173cf111245f34ca00b48187",
-                "reference": "f999367014d2c3af173cf111245f34ca00b48187",
+                "url": "https://api.github.com/repos/tebru/retrofit-php/zipball/55228d0bdecc0951579aeb16c50c072c10133d82",
+                "reference": "55228d0bdecc0951579aeb16c50c072c10133d82",
                 "shasum": ""
             },
             "require": {
                 "doctrine/annotations": "1.2.*",
-                "doctrine/common": "2.4.*",
                 "guzzlehttp/guzzle": "5.0.*",
                 "jms/serializer": "0.16.*",
-                "symfony/event-dispatcher": "2.6.*",
+                "php": ">= 5.4",
+                "symfony/console": "2.6.*",
                 "symfony/filesystem": "2.6.*",
                 "twig/twig": "*"
             },
+            "require-dev": {
+                "mockery/mockery": "0.9.*",
+                "php": ">= 5.5",
+                "phpunit/phpunit": "4.4.*"
+            },
+            "bin": [
+                "bin/retrofit"
+            ],
             "type": "library",
             "autoload": {
                 "psr-0": {
                     "Tebru\\Retrofit": "src/"
+                },
+                "psr-4": {
+                    "Tebru\\Retrofit\\Test\\": "tests/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -1372,7 +1440,7 @@
                 }
             ],
             "description": "Retrofit for PHP - A PHP REST client.",
-            "time": "2015-01-20 02:18:55"
+            "time": "2015-01-23 00:52:01"
         },
         {
             "name": "twig/twig",
