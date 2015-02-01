@@ -14,6 +14,8 @@ use Tebru\DilbertPics\Exception\NullPointerException;
 use Tebru\DilbertPics\Exception\ResourceNotFoundException;
 use Tebru\Log\Loggable;
 
+use function Tebru\assert;
+
 /**
  * Class DilbertClient
  *
@@ -58,10 +60,7 @@ class DilbertClient
     {
         $link = $this->getUrl();
 
-        // check if image exists
-        if (!$this->resourceExists($link)) {
-            throw new ResourceNotFoundException('Web page does not exist');
-        }
+        assert($this->resourceExists($link), new ResourceNotFoundException('Web page does not exist'));
 
         $webpage = file_get_contents($link);
         $html = new DOMDocument();
@@ -85,15 +84,8 @@ class DilbertClient
 
         $this->getLogger()->debug('Image source url: ' . $src);
 
-        if (null === $src) {
-            throw new NullPointerException('Could not get image from page');
-        }
-
-        // check if image exists
-        if (!$this->resourceExists($src)) {
-            throw new ResourceNotFoundException('Image does not exist');
-        }
-
+        assert(null !== $src, new NullPointerException('Could not get image from page'));
+        assert($this->resourceExists($src), new ResourceNotFoundException('Image does not exist'));
 
         return base64_encode(file_get_contents($src));
     }

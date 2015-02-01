@@ -7,12 +7,13 @@
 
         "tebru/executioner": "dev-master",
         "tebru/loggable": "dev-master",
-        "guzzlehttp/guzzle": "dev-master",
+        "guzzlehttp/guzzle": "5.2.*",
         "guzzlehttp/oauth-subscriber": "dev-master",
         "guzzlehttp/log-subscriber": "dev-master",
         "monolog/monolog": "dev-master",
         "symfony/debug": "dev-master",
-        "tebru/retrofit-php": "dev-master"
+        "tebru/retrofit-php": "dev-master",
+        "tebru/assert": "~0.1"
     },
     "license": "MIT",
     "authors": [

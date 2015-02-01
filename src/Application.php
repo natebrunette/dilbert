@@ -23,6 +23,8 @@ use Tebru\Executioner\Factory\ExecutorFactory;
 use Tebru\Executioner\Strategy\ExponentialBackoffStrategy;
 use Tebru\Retrofit\Adapter\RestAdapter;
 
+use function Tebru\assert;
+
 /**
  * Class Application
  *
@@ -101,9 +103,7 @@ class Application
             return $twitterUploadClient->uploadImage($image);
         });
 
-        if (!isset($response['media_id'])) {
-            throw new NullPointerException('Media id not set on response');
-        }
+        assert(isset($response['media_id']), new NullPointerException('Media id not set on response'));
 
         $mediaId = $response['media_id'];
 
