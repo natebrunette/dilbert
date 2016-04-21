@@ -2,18 +2,14 @@
     "name": "tebru/dilbertpics",
     "description": "Tweet the daily dilbert comic image.",
     "require": {
-        "php": ">= 5.5",
-        "ext-spl_types": "*",
-
-        "tebru/executioner": "dev-master",
-        "tebru/loggable": "dev-master",
-        "guzzlehttp/guzzle": "5.2.*",
-        "guzzlehttp/oauth-subscriber": "dev-master",
-        "guzzlehttp/log-subscriber": "dev-master",
-        "monolog/monolog": "dev-master",
-        "symfony/debug": "dev-master",
-        "tebru/retrofit-php": "dev-master",
-        "tebru/assert": "~0.1"
+        "php": ">= 7.0",
+        "tebru/executioner": "^0.4.1",
+        "guzzlehttp/guzzle": "^6.0",
+        "guzzlehttp/oauth-subscriber": "0.3.0",
+        "monolog/monolog": "^1.19",
+        "tebru/retrofit-php": "^2.8",
+        "tebru/assert": "^0.2",
+        "symfony/console": "^3.0"
     },
     "license": "MIT",
     "authors": [
@@ -25,7 +21,8 @@
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
-            "Tebru\\DilbertPics\\": "src/"
+            "Tebru\\Dilbot\\": "src/",
+            "Tebru\\Retrofit\\Generated\\": "var/cache/retrofit"
         }
     }
 }

@@ -3,7 +3,7 @@
  * File AppException.php 
  */
 
-namespace Tebru\DilbertPics\Exception;
+namespace Tebru\Dilbot\Exception;
 
 use Exception;
 use Monolog\Logger;

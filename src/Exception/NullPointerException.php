@@ -3,7 +3,7 @@
  * File NullPointerException.php 
  */
 
-namespace Tebru\DilbertPics\Exception;
+namespace Tebru\Dilbot\Exception;
 
 /**
  * Class NullPointerException

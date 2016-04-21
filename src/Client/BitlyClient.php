@@ -3,25 +3,28 @@
  * File BitlyClient.php 
  */
 
-namespace Tebru\DilbertPics\Client;
+namespace Tebru\Dilbot\Client;
 
-use Tebru\Retrofit\Annotation as Rest;
+use Tebru\Retrofit\Annotation\GET;
+use Tebru\Retrofit\Annotation\Query;
+use Tebru\Retrofit\Annotation\Returns;
 
 /**
  * Interface BitlyClient
  *
  * @author Nate Brunette <n@tebru.net>
- * @Rest\Query("authToken")
  */
 interface BitlyClient
 {
     /**
-     * @param $longUrl
-     * @return mixed
+     * Shorten a url
      *
-     * @Rest\GET("/v3/shorten?format=txt")
-     * @Rest\Query("longUrl")
-     * @Rest\Returns("raw")
+     * @param string $longUrl
+     * @return string
+     *
+     * @GET("/v3/shorten?format=txt")
+     * @Query("longUrl")
+     * @Returns("raw")
      */
-    public function shorten($longUrl);
+    public function shorten(string $longUrl);
 }

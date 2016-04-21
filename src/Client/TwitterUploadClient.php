@@ -3,22 +3,33 @@
  * File TwitterUploadClient.php
  */
 
-namespace Tebru\DilbertPics\Client;
+namespace Tebru\Dilbot\Client;
 
-use Tebru\Retrofit\Annotation as Rest;
+use Tebru\Retrofit\Annotation\FormUrlEncoded;
+use Tebru\Retrofit\Annotation\Part;
+use Tebru\Retrofit\Annotation\POST;
+use Tebru\Retrofit\Annotation\Returns;
+
 
 /**
  * Interface TwitterUploadClient
  *
  * @author Nate Brunette <n@tebru.net>
+ *
+ * @FormUrlEncoded()
  */
 interface TwitterUploadClient
 {
     /**
-     * @Rest\POST("/media/upload.json")
-     * @Rest\Part("media", var="image")
-     * @Rest\Returns("array")
+     * Upload an image to twitter
+     *
+     * @param string $image
+     * @return string
+     *
+     * @POST("/media/upload.json")
+     * @Part("media", var="image")
+     * @Returns("array")
      */
-    public function uploadImage($image);
+    public function uploadImage(string $image);
 
 }
