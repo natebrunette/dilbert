@@ -18,7 +18,6 @@
             "email": "n@tebru.net"
         }
     ],
-    "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
             "Tebru\\Dilbot\\": "src/",
