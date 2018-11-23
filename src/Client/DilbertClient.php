@@ -81,8 +81,8 @@ class DilbertClient
 
         /** @var DOMElement $image */
         foreach ($images as $image) {
-            if (false !== strpos($image->getAttribute('src'), 'http://assets.amuniversal.com')) {
-                $src = $image->getAttribute('src');
+            if (false !== strpos($image->getAttribute('src'), '//assets.amuniversal.com')) {
+                $src = 'https:'.$image->getAttribute('src');
                 break;
             }
         }
