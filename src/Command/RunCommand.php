@@ -212,7 +212,8 @@ class RunCommand extends Command
         $executor = ExecutorFactory::make('image', $this->logger, 2);
 
         return $executor->execute(2, function () {
-            return $this->bitlyClient->shorten($this->dilbertClient->getUrl());
+            $response = $this->bitlyClient->shorten(['long_url' => $this->dilbertClient->getUrl()]);
+            return $response['link'];
         });
     }
 

@@ -7,6 +7,7 @@
 namespace Tebru\Dilbot\Subscriber;
 
 use InvalidArgumentException;
+use Psr\Http\Message\RequestInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Tebru\Retrofit\Event\BeforeSendEvent;
 
@@ -68,14 +69,9 @@ class BitlyRequestSubscriber implements EventSubscriberInterface
     public function beforeSend(BeforeSendEvent $event)
     {
         $request = $event->getRequest();
-        $uri = $request->getUri();
 
-        $queries = [];
-        parse_str($uri->getQuery(), $queries);
-        $queries['access_token'] = $this->accessToken;
-        $uri = $uri->withQuery(http_build_query($queries));
-
-        $request = $request->withUri($uri);
+        /** @var RequestInterface $request */
+        $request = $request->withHeader('Authorization', 'Bearer '.$this->accessToken);
 
         $event->setRequest($request);
     }

@@ -5,8 +5,9 @@
 
 namespace Tebru\Dilbot\Client;
 
-use Tebru\Retrofit\Annotation\GET;
-use Tebru\Retrofit\Annotation\Query;
+use Tebru\Retrofit\Annotation\Body;
+use Tebru\Retrofit\Annotation\JsonBody;
+use Tebru\Retrofit\Annotation\POST;
 use Tebru\Retrofit\Annotation\Returns;
 
 /**
@@ -19,12 +20,13 @@ interface BitlyClient
     /**
      * Shorten a url
      *
-     * @param string $longUrl
-     * @return string
+     * @POST("/v4/shorten")
+     * @JsonBody()
+     * @Body("body", jsonSerializable=true)
+     * @Returns("array")
      *
-     * @GET("/v3/shorten?format=txt")
-     * @Query("longUrl")
-     * @Returns("raw")
+     * @param array $body
+     * @return array
      */
-    public function shorten(string $longUrl);
+    public function shorten(array $body);
 }
